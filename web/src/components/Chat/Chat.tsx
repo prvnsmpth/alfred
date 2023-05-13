@@ -87,9 +87,17 @@ export const Chat: React.FC<Props> = ({ disableChat, messagesList }) => {
       const _messagesWithSession = JSON.parse(
         JSON.stringify(messagesWithSession)
       );
+      const text =
+        data.type === "summary" ? data.message.summary : data.message;
       _messagesWithSession[sessionId] = [
         ...(messagesWithSessionRef.current[sessionId] || []),
-        { id: String(+new Date()), text: data.message, sender: data.role },
+        {
+          id: String(+new Date()),
+          text,
+          sender: data.role,
+          type: data.type,
+          tags: data.message.tags,
+        },
       ];
       setMessagesWithSession(_messagesWithSession);
       // setMessages((prev) => {

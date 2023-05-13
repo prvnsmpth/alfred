@@ -1,9 +1,12 @@
+import { Badge } from "@nextui-org/react";
 import React, { useEffect } from "react";
 
 export interface Message {
   id: string;
   text: string;
   sender: string;
+  type?: string;
+  tags?: string[];
 }
 
 interface Props {
@@ -26,7 +29,9 @@ export const ChatMessage: React.FC<Props> = ({
       key={message.id}
       className={`chat-message chat-message-${
         message.sender === "Me"
-          ? `self chat-message-color-${chatSelfThemeBetween1to5}`
+          ? message.type === "summary"
+            ? `self chat-message-color-3 full-width`
+            : `self chat-message-color-${chatSelfThemeBetween1to5}`
           : "other"
       }`}
     >
@@ -37,7 +42,31 @@ export const ChatMessage: React.FC<Props> = ({
         </div>
         <div className="chat-message-text">
           <span className={loaded ? "loaded" : ""}>
+            {message.type === "summary" ? (
+              <>
+                <div>Summary:</div>
+                <br />
+              </>
+            ) : (
+              ""
+            )}
             {message.text} {message.text.length <= 3 ? "\u00A0" : ""}
+            {message.type === "summary" ? (
+              <>
+                <br /><br />
+                Tags:{" "}
+                {message.tags?.map((tag) => (
+                  <Badge color="primary">{tag}</Badge>
+                ))}
+                <br /><br />
+                {/* Caller:{" "}
+                {message.tags?.map((tag) => (
+                  <Badge color="primary">{tag}</Badge>
+                ))} */}
+              </>
+            ) : (
+              ""
+            )}
           </span>
           <div className="chat-message-backdrop"></div>
         </div>
