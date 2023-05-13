@@ -55,7 +55,7 @@ def message_handler():
     return { 'message': ai_message.content }
 
 @app.route("/api/disconnect", methods=['POST'])
-def message_handler():
+def disconnect_handler():
     if 'session_id' not in request.json:
         return "session_id required", 400
     session_id = request.json['session_id']
