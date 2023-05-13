@@ -27,9 +27,12 @@ Finally generate a summary of the call for Mr Wayne to review in JSON format. Sh
 "tags" field is an array and can have the following values: "important", "scam", "spam", "sales".
 '''
 CONVO_END_MARKER = 'CONVO_END'
-CHATS_FILE = 'chats.json'
+CHATS_FILE = 'chats.pickle'
 
-chat_sessions = {}
+CHAT_DB = {
+    'sessions': {},
+    'summaries': {}
+}
 
 app = Flask(__name__, static_url_path='', static_folder='web/build')
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -48,6 +51,7 @@ def message_handler():
     if 'session_id' not in request.json:
         return "session_id required", 400
     session_id = request.json['session_id']
+    chat_sessions = CHAT_DB['sessions']
     if session_id not in chat_sessions:
         chat_sessions[session_id] = [
             SystemMessage(content=SYSTEM_PROMPT)
@@ -63,6 +67,7 @@ def message_handler():
     chat_sessions[session_id].append(human_msg)
     ai_message = chat_openai(chat_sessions[session_id])
     chat_sessions[session_id].append(ai_message)
+    print(f'[session_id={session_id}] full AI message = {ai_message.content}')
 
     # The message to return in the response
     final_message = ai_message.content
@@ -73,6 +78,7 @@ def message_handler():
 
         try:
             summary_data = json.loads(convo_summary.strip())
+            CHAT_DB['summaries'][session_id] = summary_data
         except Exception as e:
             print(f'Got malformed JSON', e)
             summary_data = { "caller": "Unknown", "summary": convo_summary, "tags": [] }
@@ -91,28 +97,28 @@ def message_handler():
             save_sessions()
         except Exception as e:
             print(f'Failed to save sessions, ignoring.', e)
-        return { 'message': final_message }
         
     print(f'[session_id={session_id}] response = {final_message}')
     socketio.emit('alfred_msg', {
-        'session_id': session_id, 'id': message_id + 1, 'role': 'Me', 'message': ai_message.content
+        'session_id': session_id, 'id': message_id + 1, 'role': 'Me', 'message': final_message
     })
     return { 'message': final_message }
 
-@app.route("/api/disconnect", methods=['POST'])
-def disconnect_handler():
-    if 'session_id' not in request.json:
-        return "session_id required", 400
-    session_id = request.json['session_id']
-    if session_id not in chat_sessions:
-        return f"session_id {session_id} not found", 404
-    print(f'[session_id={session_id}] Disconnected. Generating summary...')
-    summary_msg = HumanMessage(content='Generate a summary of the conversation so far.')
-    chat_sessions[session_id].append(summary_msg)
-    ai_message = chat_openai(chat_sessions[session_id])
-    chat_sessions[session_id].append(ai_message)
-    print(f'[session_id={session_id}] Summary: {ai_message.content}')
-    return 'OK', 200
+# @app.route("/api/disconnect", methods=['POST'])
+# def disconnect_handler():
+#     if 'session_id' not in request.json:
+#         return "session_id required", 400
+#     session_id = request.json['session_id']
+#     chat_sessions = CHAT_DB['sessions']
+#     if session_id not in chat_sessions:
+#         return f"session_id {session_id} not found", 404
+#     print(f'[session_id={session_id}] Disconnected. Generating summary...')
+#     summary_msg = HumanMessage(content='Generate a summary of the conversation so far.')
+#     chat_sessions[session_id].append(summary_msg)
+#     ai_message = chat_openai(CHAT_DB[session_id])
+#     chat_sessions[session_id].append(ai_message)
+#     print(f'[session_id={session_id}] Summary: {ai_message.content}')
+#     return 'OK', 200
 
 @app.route("/api/get_summary", methods=['GET'])
 def get_summary():
@@ -120,16 +126,14 @@ def get_summary():
     if session_id is None:
         return "session_id is required", 400
 
-    last_message = chat_sessions[session_id][-1]
-    if CONVO_END_MARKER in last_message:
-        summary = last_message.split(CONVO_END_MARKER)[-1]
-        return { "summary": summary }
+    if session_id in CHAT_DB['summaries']:
+        return { "summary": CHAT_DB['summaries'][session_id] }
     else:
         return "The conversation has not ended yet.", 404
 
 @app.route("/api/get_chats", methods=['GET'])
 def get_chats():
-    last_message = chat_sessions[session_id][-1]
+    last_message = CHAT_DB[session_id][-1]
     if CONVO_END_MARKER in last_message:
         summary = last_message.split(CONVO_END_MARKER)[-1]
         return { "summary": summary }
@@ -147,17 +151,17 @@ def alfred_msg_handler(json_msg):
     print(message)
 
 def save_sessions():
-    with open('chats.pickle', 'wb') as f:
-        f.write(pickle.dumps(chat_sessions))
+    with open(CHATS_FILE, 'wb') as f:
+        f.write(pickle.dumps(CHAT_DB))
 
 def load_sessions():
-    if not os.path.isfile('chats.pickle'):
+    if not os.path.isfile(CHATS_FILE):
         return None
-    with open('chats.pickle', 'rb') as f:
+    with open(CHATS_FILE, 'rb') as f:
         return pickle.loads(f.read())
 
 if __name__ == '__main__':
     loaded_chat_sessions = load_sessions()
     if loaded_chat_sessions:
-        chat_sessions = loaded_chat_sessions
+        CHAT_DB = loaded_chat_sessions
     socketio.run(app, host='0.0.0.0', port=80)
