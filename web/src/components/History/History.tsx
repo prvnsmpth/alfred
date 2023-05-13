@@ -50,6 +50,33 @@ const mockMessages: Message[] = [
   },
 ];
 
+function convertSampleHistoryResponseToHistoryItems(chatsResponse: any) {
+  const historyItems: HistoryItem[] = [];
+  const sessions: any = chatsResponse.sessions;
+  const summaries: any = chatsResponse.summaries;
+  for (let session in sessions) {
+    const messages = sessions[session];
+    const summary = summaries[session];
+    const historyItem: HistoryItem = {
+      id: session,
+      caller: messages[0].role === "Caller" ? messages[0].message : "Unknown",
+      date: "May 14,2023",
+      duration: `0:${Math.floor(Math.random() * 60)}:00`,
+      category: summary.tags[0],
+      iconName: "circle-xmark",
+      messages: messages.map((message: any) => {
+        return {
+          id: String(+new Date()),
+          text: message.message,
+          sender: message.role,
+        };
+      }),
+    };
+    historyItems.push(historyItem);
+  }
+  return historyItems;
+}
+
 const mockHistoryItems: HistoryItem[] = [
   {
     id: "1",
@@ -84,17 +111,21 @@ export const History = () => {
   const [chats, setChats] = React.useState<HistoryItem[]>([]);
   useEffect(() => {
     async function getChats() {
-      setChats(mockHistoryItems);
-      // try {
-      //   const res = await fetch("http://localhost/api/get_chats");
-      //   const chats = await res.json();
-      //   console.log(chats);
-      // } catch (error) {
-      //   console.error(error);
-      // }
+      // setChats(mockHistoryItems);
+      try {
+        const res = await fetch("http://localhost/api/get_chats");
+        const chats = await res.json();
+        const chatHistoryItems =
+          convertSampleHistoryResponseToHistoryItems(chats);
+        setChats(chatHistoryItems);
+        console.log(chats);
+        localStorage.setItem("chats", JSON.stringify(chatHistoryItems));
+      } catch (error) {
+        console.error(error);
+      }
     }
     getChats();
-  });
+  }, []);
   return (
     <div className="box transaction-box">
       <div className="header-container">
@@ -110,8 +141,7 @@ export const History = () => {
           <th>Call Duration</th>
           <th>Category</th>
         </tr>
-        {mockHistoryItems.map((historyItem: HistoryItem) => {
-          const i = { name: "circle-xmark" };
+        {chats.map((historyItem: HistoryItem) => {
           return (
             <tr key={historyItem.id}>
               <td>

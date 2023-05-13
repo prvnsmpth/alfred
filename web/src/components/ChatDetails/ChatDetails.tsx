@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Chat } from "../Chat/Chat";
+import { useParams } from "react-router-dom";
 
 const mockMessages = [
   {
@@ -30,5 +31,16 @@ const mockMessages = [
 ];
 
 export const ChatDetails = () => {
-  return <Chat disableChat messagesList={mockMessages} />;
+  const [messages, setMessages] = React.useState([]);
+  const { id } = useParams();
+  useEffect(() => {
+    try {
+      const chats = JSON.parse(localStorage.getItem("chats") || "[]");
+      const chat = chats.find((chat: any) => chat.id === id);
+      setMessages(chat.messages || []);
+    } catch (error) {
+      setMessages([]);
+    }
+  }, []);
+  return <Chat disableChat messagesList={messages} />;
 };
