@@ -63,25 +63,41 @@ def message_handler():
     chat_sessions[session_id].append(human_msg)
     ai_message = chat_openai(chat_sessions[session_id])
     chat_sessions[session_id].append(ai_message)
-    socketio.emit('alfred_msg', {
-        'session_id': session_id, 'id': message_id + 1, 'role': 'Me', 'message': ai_message.content
-    })
+
+    # The message to return in the response
+    final_message = ai_message.content
 
     if CONVO_END_MARKER in ai_message.content:
         final_message, convo_summary = ai_message.content.split(CONVO_END_MARKER)
-        print(f'Conversation ENDED. Summary: {convo_summary}')
+        print(f'[session_id={session_id}] Conversation ended. Summary = {convo_summary}')
 
-        print(f'Persisting sessions to disk...')
+        try:
+            summary_data = json.loads(convo_summary.strip())
+        except Exception as e:
+            print(f'Got malformed JSON', e)
+            summary_data = { "caller": "Unknown", "summary": convo_summary, "tags": [] }
+
+        # Send the summary to the UI for displaying
+        socketio.emit('alfred_msg', {
+            'type': 'summary',
+            'session_id': session_id, 
+            'id': message_id + 1, 
+            'role': 'Me', 
+            'message': summary_data
+        })
+
+        print(f'[session_id={session_id}] Persisting sessions to disk...')
         try:
             save_sessions()
-        except Error as e:
-            print(f'Failed to save sessions, ignoring.')
-            print('Error', e)
-        
+        except Exception as e:
+            print(f'Failed to save sessions, ignoring.', e)
         return { 'message': final_message }
         
-
-    return { 'message': ai_message.content }
+    print(f'[session_id={session_id}] response = {final_message}')
+    socketio.emit('alfred_msg', {
+        'session_id': session_id, 'id': message_id + 1, 'role': 'Me', 'message': ai_message.content
+    })
+    return { 'message': final_message }
 
 @app.route("/api/disconnect", methods=['POST'])
 def disconnect_handler():
@@ -110,6 +126,16 @@ def get_summary():
         return { "summary": summary }
     else:
         return "The conversation has not ended yet.", 404
+
+@app.route("/api/get_chats", methods=['GET'])
+def get_chats():
+    last_message = chat_sessions[session_id][-1]
+    if CONVO_END_MARKER in last_message:
+        summary = last_message.split(CONVO_END_MARKER)[-1]
+        return { "summary": summary }
+    else:
+        return "The conversation has not ended yet.", 404
+
 
 # @socketio.on('connect')
 # def test_connect(auth):
