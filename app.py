@@ -1,3 +1,4 @@
+import os
 import json
 from flask import Flask, send_from_directory, send_file, request
 from flask_socketio import SocketIO, send, emit
@@ -25,6 +26,7 @@ Finally generate a summary of the call for Mr Wayne to review in JSON format. Sh
 "tags" field is an array and can have the following values: "important", "scam", "spam", "sales".
 '''
 CONVO_END_MARKER = 'CONVO_END'
+CHATS_FILE = 'chats.json'
 
 chat_sessions = {}
 
@@ -68,6 +70,9 @@ def message_handler():
         convo_summary = ai_message.content.split(CONVO_END_MARKER)[-1]
         print(f'Conversation ENDED. Summary: {convo_summary}')
 
+        print(f'Persisting sessions to disk...')
+        save_sessions()
+
     return { 'message': ai_message.content }
 
 @app.route("/api/disconnect", methods=['POST'])
@@ -107,5 +112,19 @@ def alfred_msg_handler(json_msg):
     message = json.loads(json_msg).message
     print(message)
 
+def save_sessions():
+    sessions_json = json.dumps(chat_sessions)
+    with open('chats.json', 'w') as f:
+        f.write(sessions_json)
+
+def load_sessions():
+    if not os.path.isfile('chats.json'):
+        return None
+    with open('chats.json') as f:
+        return json.loads(f.read())
+
 if __name__ == '__main__':
+    loaded_chat_sessions = load_sessions()
+    if loaded_chat_sessions:
+        chat_sessions = loaded_chat_sessions
     socketio.run(app, host='0.0.0.0', port=80)
