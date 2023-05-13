@@ -2,7 +2,7 @@ import { Input, Loading, Spacer } from "@nextui-org/react";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ChatMessage, Message } from "./ChatMessage";
 // const chatSelfThemeBetween1to5 = Math.floor(Math.random() * 5 + 1);
-import { socket } from '../../socket';
+import { socket } from "../../socket";
 
 const chatSelfThemeBetween1to5 = 1;
 const lorem100 =
@@ -37,7 +37,12 @@ interface Props {
 }
 
 export const Chat: React.FC<Props> = ({ disableChat, messagesList }) => {
-  const [messages, setMessages] = React.useState<Message[]>(messagesList || []);
+  // const [prevSession, setPrevSession] = React.useState<string>("");
+  const [currentSession, setCurrentSession] = React.useState<string>("");
+  // const [messages, setMessages] = React.useState<Message[]>(messagesList || []);
+  const [messagesWithSession, setMessagesWithSession] = React.useState<any>({});
+  const messagesWithSessionRef = useRef(messagesWithSession);
+  messagesWithSessionRef.current = messagesWithSession;
   const [newMessage, setNewMessage] = React.useState<string>("");
   const [loading, setLoading] = React.useState<"left" | "right" | null>(null);
   const [isConnected, setIsConnected] = useState(socket.connected);
@@ -45,14 +50,23 @@ export const Chat: React.FC<Props> = ({ disableChat, messagesList }) => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-  useLayoutEffect(() => {
-    setTimeout(() => {
-      if (!messagesList) setMessages(mockMessages);
-    }, 400);
-  }, []);
+  const messages = messagesWithSession[currentSession] || [];
+  // useLayoutEffect(() => {
+  //   setTimeout(() => {
+  //     if (!messagesList) setMessages(mockMessages);
+  //   }, 400);
+  // }, []);
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // useEffect(() => {
+  //   if (prevSession !== "") {
+  //     setMessages([]);
+  //   }
+  // }, [currentSession]);
+
+  console.log("messagesWithSession", messagesWithSession);
 
   useEffect(() => {
     function onConnect() {
@@ -64,21 +78,35 @@ export const Chat: React.FC<Props> = ({ disableChat, messagesList }) => {
     }
 
     function onMessage(data: any) {
-      console.log('Alfred message: ' + JSON.stringify(data))
-      setMessages(prev => {
-        const newMessages = [ ...prev, { id: "1", text: data.message, sender: data.role } ]
-        return newMessages
-      }) 
+      console.log("Alfred message: " + JSON.stringify(data));
+      // setPrevSession(currentSession);
+      const sessionId = String(data.session_id);
+      setCurrentSession(sessionId);
+      const _messagesWithSession = JSON.parse(
+        JSON.stringify(messagesWithSession)
+      );
+      _messagesWithSession[sessionId] = [
+        ...(messagesWithSessionRef.current[sessionId] || []),
+        { id: String(+new Date()), text: data.message, sender: data.role },
+      ];
+      setMessagesWithSession(_messagesWithSession);
+      // setMessages((prev) => {
+      //   const newMessages = [
+      //     ...prev,
+      //     { id: String(+new Date()), text: data.message, sender: data.role },
+      //   ];
+      //   return newMessages;
+      // });
     }
 
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
-    socket.on('alfred_msg', onMessage);
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+    socket.on("alfred_msg", onMessage);
 
     return () => {
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
-      socket.off('alfred_msg', onMessage);
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+      socket.off("alfred_msg", onMessage);
     };
   }, []);
 
@@ -116,37 +144,36 @@ export const Chat: React.FC<Props> = ({ disableChat, messagesList }) => {
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !!newMessage) {
-                setMessages((prevMessages) => {
-                  return [
-                    ...prevMessages,
-                    {
-                      id: Math.random().toString(),
-                      text: newMessage,
-                      sender: "Me",
-                    },
-                  ];
-                });
-                setLoading("left");
-                setTimeout(() => {
-                  setMessages((prevMessages) => {
-                    const startIndex = Math.floor(Math.random() * 20);
-                    let endIndex = startIndex + Math.floor(Math.random() * 100);
-                    endIndex = endIndex > 100 ? 100 : endIndex;
-                    return [
-                      ...prevMessages,
-                      {
-                        id: Math.random().toString(),
-                        text: lorem100.substring(startIndex, endIndex),
-                        sender: "Caller",
-                      },
-                    ];
-                  });
-                  setLoading(null);
-                }, Math.random() * 1500);
-
-                setNewMessage("");
-              }
+              // if (e.key === "Enter" && !!newMessage) {
+              //   setMessages((prevMessages) => {
+              //     return [
+              //       ...prevMessages,
+              //       {
+              //         id: Math.random().toString(),
+              //         text: newMessage,
+              //         sender: "Me",
+              //       },
+              //     ];
+              //   });
+              //   setLoading("left");
+              //   setTimeout(() => {
+              //     setMessages((prevMessages) => {
+              //       const startIndex = Math.floor(Math.random() * 20);
+              //       let endIndex = startIndex + Math.floor(Math.random() * 100);
+              //       endIndex = endIndex > 100 ? 100 : endIndex;
+              //       return [
+              //         ...prevMessages,
+              //         {
+              //           id: Math.random().toString(),
+              //           text: lorem100.substring(startIndex, endIndex),
+              //           sender: "Caller",
+              //         },
+              //       ];
+              //     });
+              //     setLoading(null);
+              //   }, Math.random() * 1500);
+              //   setNewMessage("");
+              // }
             }}
           />
         </div>
