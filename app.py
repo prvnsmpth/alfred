@@ -9,7 +9,7 @@ from langchain.schema import (
     SystemMessage
 )
 
-chat_openai = ChatOpenAI(model_name="gpt-3.5-turbo")
+chat_openai = ChatOpenAI(model_name="gpt-4")
 
 SYSTEM_PROMPT = '''
 You are a personal assistant to Pankaj. You are handling a phone conversation for him as he is unavailable right now.
@@ -49,13 +49,17 @@ def message_handler():
     message = request.json['message']
     print(f'[session_id={session_id}] message = {message}')
     message_id = len(chat_sessions[session_id]) + 1
-    socketio.emit('alfred_msg', { 'id': message_id, 'role': 'user', 'message': message })
+    socketio.emit('alfred_msg', {
+        'session_id': session_id, 'id': message_id, 'role': 'Caller', 'message': message
+    })
 
     human_msg = HumanMessage(content=message)
     chat_sessions[session_id].append(human_msg)
     ai_message = chat_openai(chat_sessions[session_id])
     chat_sessions[session_id].append(ai_message)
-    socketio.emit('alfred_msg', { 'id': message_id + 1, 'role': 'assistant', 'message': ai_message.content })
+    socketio.emit('alfred_msg', {
+        'session_id': session_id, 'id': message_id + 1, 'role': 'Me', 'message': ai_message.content
+    })
     return { 'message': ai_message.content }
 
 @app.route("/api/disconnect", methods=['POST'])
