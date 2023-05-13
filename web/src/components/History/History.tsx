@@ -1,14 +1,16 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { icon } from "@fortawesome/fontawesome-svg-core/import.macro";
+import { icon, solid } from "@fortawesome/fontawesome-svg-core/import.macro";
 import "./History.scss";
 import { IconName } from "@fortawesome/fontawesome-svg-core";
 import { Link } from "@nextui-org/react";
+import { faAddressBook, faCircleXmark } from "@fortawesome/free-regular-svg-icons";
+import { faPizzaSlice } from "@fortawesome/free-solid-svg-icons";
 
 const icons = {
-  "circle-xmark": icon({ name: "circle-xmark" }),
-  "pizza-slice": icon({ name: "pizza-slice" }),
-  "address-book": icon({ name: "address-book" }),
+  "circle-xmark": faCircleXmark,
+  "pizza-slice": faPizzaSlice,
+  "address-book": faAddressBook,
 };
 
 interface HistoryItem {
@@ -24,7 +26,7 @@ const mockHistoryItems: HistoryItem[] = [
   {
     id: "1",
     caller: "Unknown number",
-    date: "Jan 01,2022",
+    date: "Jan 01,2023",
     duration: "0:37:00",
     category: "Spam",
     iconName: "circle-xmark",
@@ -32,7 +34,7 @@ const mockHistoryItems: HistoryItem[] = [
   {
     id: "2",
     caller: "Swiggy",
-    date: "Jan 04,2022",
+    date: "Jan 04,2023",
     duration: "0:7:00",
     category: "Food Delivery",
     iconName: "pizza-slice",
@@ -40,7 +42,7 @@ const mockHistoryItems: HistoryItem[] = [
   {
     id: "3",
     caller: "John Doe",
-    date: "Jan 06,2022",
+    date: "Jan 06,2023",
     duration: "0:10:00",
     category: "Known Contact",
     iconName: "address-book",
@@ -53,7 +55,7 @@ export const History = () => {
       <div className="header-container">
         <h3 className="section-header">Call History</h3>
         <div className="date-selector">
-          <span>1 Jan - 1 Feb 2022</span>
+          <span>1 Jan - 1 Feb 2023</span>
         </div>
       </div>
       <table className="transaction-history">
@@ -76,7 +78,7 @@ export const History = () => {
               <td>{historyItem.duration}</td>
               <td>
                 {/* <FontAwesomeIcon
-                  icon={icon({ name: "circle-xmark" })}
+                  icon={solid("circle-xmark")}
                   color={
                     historyItem.category === "Spam"
                       ? "red"
@@ -84,15 +86,16 @@ export const History = () => {
                       ? "#3252bc"
                       : "green"
                   }
-                /> */}
-                &nbsp;&nbsp; {historyItem.category}
+                />
+                &nbsp;&nbsp;  */}
+                {historyItem.category}
               </td>
             </tr>
           );
         })}
         {/* <tr>
           <td>Unknown number</td>
-          <td>Jan 01,2022</td>
+          <td>Jan 01,2023</td>
           <td>0:37:00</td>
           <td>
             <FontAwesomeIcon
@@ -104,7 +107,7 @@ export const History = () => {
         </tr>
         <tr>
           <td>Swiggy</td>
-          <td>Jan 04,2022</td>
+          <td>Jan 04,2023</td>
           <td>0:7:00</td>
           <td>
             <FontAwesomeIcon
@@ -116,7 +119,7 @@ export const History = () => {
         </tr>
         <tr>
           <td>John Doe</td>
-          <td>Jan 06,2022</td>
+          <td>Jan 06,2023</td>
           <td>0:10:00</td>
           <td>
             <FontAwesomeIcon
