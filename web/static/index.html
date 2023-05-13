@@ -1,9 +1,27 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Alfred</title>
-		<link rel="stylesheet" type="text/css" href="css/main.css">
-		<body>
-			<p>Hello, this is Alfred</p>
-		</body>
+
+<head>
+	<title>Alfred</title>
+	<link rel="stylesheet" type="text/css" href="css/main.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+		integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+		crossorigin="anonymous"></script>
+	<script type="text/javascript" charset="utf-8">
+		var socket = io();
+		socket.on('connect', function () {
+			socket.emit('my event', { data: 'I\'m connected!' });
+		});
+
+		socket.on('alfred_msg', (data) => {
+			console.log('Alfred says: ' + JSON.stringify(data))
+		})
+	</script>
+</head>
+
+<body>
+	<p>Hello, this is Alfred</p>
+
+</body>
+
 </html>
