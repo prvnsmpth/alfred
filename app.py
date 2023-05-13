@@ -12,8 +12,16 @@ from langchain.schema import (
 chat_openai = ChatOpenAI(model_name="gpt-3.5-turbo")
 
 SYSTEM_PROMPT = '''
-You are a butler specializing in handling phone calls.
+You are a personal assistant to Pankaj. You are handling a phone conversation for him as he is unavailable right now.
+Talk to the caller. Get their name and purpose for the call.
+For my interest topics, ask some relevant follow up questions. Be polite for this.
+My interests are: Home loan
+For topics other than my interests, be very rude and sassy.
+Once you've collected enough information, tell them that you'll pass on this information to Pankaj and he'll call them back.
+Output this string: "CONVO_END".
+Finally generate a summary of the call for Pankaj to review.
 '''
+CONVO_END_MARKER = 'CONVO_END'
 
 chat_sessions = {}
 
@@ -45,6 +53,19 @@ def message_handler():
     ai_message = chat_openai(chat_sessions[session_id])
     chat_sessions[session_id].append(ai_message)
     return { 'message': ai_message.content }
+
+@app.route("/api/get_summary", methods=['GET'])
+def get_summary():
+    session_id = request.args.get('session_id')
+    if session_id is None:
+        return "session_id is required", 400
+
+    last_message = chat_sessions[session_id][-1]
+    if CONVO_END_MARKER in last_message:
+        summary = last_message.split(CONVO_END_MARKER)[-1]
+        return { "summary": summary }
+    else:
+        return "The conversation has not ended yet.", 404
 
 @socketio.on('connect')
 def test_connect(auth):
