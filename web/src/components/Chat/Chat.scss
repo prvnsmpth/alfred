@@ -18,7 +18,7 @@
   font-weight: 300;
   // padding: 8px 8px;
   margin-bottom: 12px;
-  //   border-radius: 8px;
+    border-radius: 8px;
   flex-direction: column;
 }
 
@@ -56,6 +56,7 @@
   height: 100%;
   background-color: black;
   animation: rollout 0.4s;
+  border-radius: 8px;
 }
 
 .chat-message-color-1 {
@@ -157,7 +158,7 @@
   flex-direction: horizontal;
   .chat-suggestion {
     padding: 6px 12px;
-    // border-radius: 4px;
+    border-radius: 8px;
     margin-right: 4px;
     cursor: pointer;
     background: #eee;

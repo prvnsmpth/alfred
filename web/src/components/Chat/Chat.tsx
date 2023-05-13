@@ -1,5 +1,5 @@
 import { Input, Spacer } from "@nextui-org/react";
-import React, { useEffect, useLayoutEffect } from "react";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
 import { ChatMessage, Message } from "./ChatMessage";
 // const chatSelfThemeBetween1to5 = Math.floor(Math.random() * 5 + 1);
 const chatSelfThemeBetween1to5 = 1;
@@ -32,11 +32,18 @@ const mockMessages = [
 export const Chat = () => {
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [newMessage, setNewMessage] = React.useState<string>("");
+  const messagesEndRef = useRef<any>(null);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
   useLayoutEffect(() => {
     setTimeout(() => {
       setMessages(mockMessages);
     }, 400);
   }, []);
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages]);
   return (
     <div className="chat-container">
       <div className="chat-messages">
@@ -47,6 +54,7 @@ export const Chat = () => {
             message={message}
           />
         ))}
+        <div ref={messagesEndRef} />
       </div>
       <Spacer y={2} />
       <div className="chat-input">
@@ -60,7 +68,7 @@ export const Chat = () => {
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
+            if (e.key === "Enter" && !!newMessage) {
               setMessages((prevMessages) => {
                 return [
                   ...prevMessages,
