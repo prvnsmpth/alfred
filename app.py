@@ -1,6 +1,7 @@
 import os
 import json
 import pickle
+import time
 from flask import Flask, send_from_directory, send_file, request
 from flask_socketio import SocketIO, send, emit
 
@@ -78,6 +79,7 @@ def message_handler():
 
         try:
             summary_data = json.loads(convo_summary.strip())
+            summary_data['ts'] = time.time()
             CHAT_DB['summaries'][session_id] = summary_data
         except Exception as e:
             print(f'Got malformed JSON', e)
@@ -133,12 +135,7 @@ def get_summary():
 
 @app.route("/api/get_chats", methods=['GET'])
 def get_chats():
-    last_message = CHAT_DB[session_id][-1]
-    if CONVO_END_MARKER in last_message:
-        summary = last_message.split(CONVO_END_MARKER)[-1]
-        return { "summary": summary }
-    else:
-        return "The conversation has not ended yet.", 404
+    return CHAT_DB
 
 
 # @socketio.on('connect')
