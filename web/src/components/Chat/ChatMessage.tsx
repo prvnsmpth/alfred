@@ -7,6 +7,7 @@ export interface Message {
   sender: string;
   type?: string;
   tags?: string[];
+  caller?: string;
 }
 
 interface Props {
@@ -44,7 +45,10 @@ export const ChatMessage: React.FC<Props> = ({
           <span className={loaded ? "loaded" : ""}>
             {message.type === "summary" ? (
               <>
-                <div>Summary:</div>
+                <h5>Caller:</h5>
+                {message.caller}
+                <br />
+                <h5>Summary:</h5>
                 <br />
               </>
             ) : (
@@ -54,15 +58,11 @@ export const ChatMessage: React.FC<Props> = ({
             {message.type === "summary" ? (
               <>
                 <br /><br />
-                Tags:{" "}
+                <h5>Tags:{" "}</h5>
                 {message.tags?.map((tag) => (
                   <Badge color="primary">{tag}</Badge>
                 ))}
                 <br /><br />
-                {/* Caller:{" "}
-                {message.tags?.map((tag) => (
-                  <Badge color="primary">{tag}</Badge>
-                ))} */}
               </>
             ) : (
               ""
