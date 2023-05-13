@@ -1,5 +1,6 @@
 import os
 import json
+import pickle
 from flask import Flask, send_from_directory, send_file, request
 from flask_socketio import SocketIO, send, emit
 
@@ -10,7 +11,7 @@ from langchain.schema import (
     SystemMessage
 )
 
-chat_openai = ChatOpenAI(model_name="gpt-4")
+chat_openai = ChatOpenAI(model_name="gpt-3.5-turbo")
 
 SYSTEM_PROMPT = '''
 You are Alfred, a personal assistant to Mr Wayne. You are handling a phone conversation for him as he is unavailable right now.
@@ -67,11 +68,18 @@ def message_handler():
     })
 
     if CONVO_END_MARKER in ai_message.content:
-        convo_summary = ai_message.content.split(CONVO_END_MARKER)[-1]
+        final_message, convo_summary = ai_message.content.split(CONVO_END_MARKER)
         print(f'Conversation ENDED. Summary: {convo_summary}')
 
         print(f'Persisting sessions to disk...')
-        save_sessions()
+        try:
+            save_sessions()
+        except Error as e:
+            print(f'Failed to save sessions, ignoring.')
+            print('Error', e)
+        
+        return { 'message': final_message }
+        
 
     return { 'message': ai_message.content }
 
@@ -90,22 +98,22 @@ def disconnect_handler():
     print(f'[session_id={session_id}] Summary: {ai_message.content}')
     return 'OK', 200
 
-# @app.route("/api/get_summary", methods=['GET'])
-# def get_summary():
-#     session_id = request.args.get('session_id')
-#     if session_id is None:
-#         return "session_id is required", 400
-#
-#     last_message = chat_sessions[session_id][-1]
-#     if CONVO_END_MARKER in last_message:
-#         summary = last_message.split(CONVO_END_MARKER)[-1]
-#         return { "summary": summary }
-#     else:
-#         return "The conversation has not ended yet.", 404
+@app.route("/api/get_summary", methods=['GET'])
+def get_summary():
+    session_id = request.args.get('session_id')
+    if session_id is None:
+        return "session_id is required", 400
 
-@socketio.on('connect')
-def test_connect(auth):
-    emit('alfred_msg', {'message': 'Hi, how can I help you?'})
+    last_message = chat_sessions[session_id][-1]
+    if CONVO_END_MARKER in last_message:
+        summary = last_message.split(CONVO_END_MARKER)[-1]
+        return { "summary": summary }
+    else:
+        return "The conversation has not ended yet.", 404
+
+# @socketio.on('connect')
+# def test_connect(auth):
+#     emit('alfred_msg', {'message': 'Hi, how can I help you?'})
 
 @socketio.on('alfred_msg')
 def alfred_msg_handler(json_msg):
@@ -113,15 +121,14 @@ def alfred_msg_handler(json_msg):
     print(message)
 
 def save_sessions():
-    sessions_json = json.dumps(chat_sessions)
-    with open('chats.json', 'w') as f:
-        f.write(sessions_json)
+    with open('chats.pickle', 'wb') as f:
+        f.write(pickle.dumps(chat_sessions))
 
 def load_sessions():
-    if not os.path.isfile('chats.json'):
+    if not os.path.isfile('chats.pickle'):
         return None
-    with open('chats.json') as f:
-        return json.loads(f.read())
+    with open('chats.pickle', 'rb') as f:
+        return pickle.loads(f.read())
 
 if __name__ == '__main__':
     loaded_chat_sessions = load_sessions()
