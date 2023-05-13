@@ -5,6 +5,7 @@
   padding: 40px;
   background: rgba(255, 255, 255);
   border-radius: 8px;
+  transition: 0.4s;
 }
 
 .chat-messages {
@@ -172,4 +173,12 @@
     //       )
     //       var(--x, 0) / 200%;
   }
+}
+
+.loader {
+  margin-top: 20px;
+}
+
+.loader-right {
+  align-self: flex-end;
 }
