@@ -1,34 +1,34 @@
 import { Input, Loading, Spacer } from "@nextui-org/react";
-import React, { useEffect, useLayoutEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ChatMessage, Message } from "./ChatMessage";
 // const chatSelfThemeBetween1to5 = Math.floor(Math.random() * 5 + 1);
-import { io } from "socket.io-client";
+import { socket } from '../../socket';
 
 const chatSelfThemeBetween1to5 = 1;
 const lorem100 =
   "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eligendi at laudantium pariatur omnis aperiam est neque eius saepe nam accusantium facilis, vero ut animi maxime magnam nemo doloremque inventore. Molestiae harum eum quisquam? Ad, commodi. Rerum nemo asperiores, magni nobis eius voluptas quo aperiam suscipit, dolor labore at qui veniam, voluptatibus earum quibusdam laboriosam culpa totam quia. Molestiae odit quo obcaecati, doloribus blanditiis quibusdam dolor a consequatur molestias rerum itaque, officia fuga sed beatae temporibus error illo, adipisci ipsam expedita quaerat? Necessitatibus sit alias quae ratione voluptate minima iure, deserunt veritatis sed impedit recusandae rerum, labore vero architecto, expedita est!";
 
-const mockMessages = [
-  {
-    id: "1",
-    text: "Hello There",
-    sender: "Caller",
-  },
-  {
-    id: "2",
-    text: "Hi There",
-    sender: "Me",
-  },
-  {
-    id: "1",
-    text: "Hello, this is longer text Hello, this is longer text Hello, this is longer text Hello, this is longer text",
-    sender: "Caller",
-  },
-  {
-    id: "2",
-    text: "Hello, this is longer text Hello, this is longer text Hello, this is longer text Hello, this is longer text",
-    sender: "Me",
-  },
+const mockMessages: Message[] = [
+  // {
+  //   id: "1",
+  //   text: "Hello There",
+  //   sender: "Caller",
+  // },
+  // {
+  //   id: "2",
+  //   text: "Hi There",
+  //   sender: "Me",
+  // },
+  // {
+  //   id: "1",
+  //   text: "Hello, this is longer text Hello, this is longer text Hello, this is longer text Hello, this is longer text",
+  //   sender: "Caller",
+  // },
+  // {
+  //   id: "2",
+  //   text: "Hello, this is longer text Hello, this is longer text Hello, this is longer text Hello, this is longer text",
+  //   sender: "Me",
+  // },
 ];
 
 interface Props {
@@ -40,6 +40,7 @@ export const Chat: React.FC<Props> = ({ disableChat, messagesList }) => {
   const [messages, setMessages] = React.useState<Message[]>(messagesList || []);
   const [newMessage, setNewMessage] = React.useState<string>("");
   const [loading, setLoading] = React.useState<"left" | "right" | null>(null);
+  const [isConnected, setIsConnected] = useState(socket.connected);
   const messagesEndRef = useRef<any>(null);
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -52,6 +53,35 @@ export const Chat: React.FC<Props> = ({ disableChat, messagesList }) => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    function onConnect() {
+      setIsConnected(true);
+    }
+
+    function onDisconnect() {
+      setIsConnected(false);
+    }
+
+    function onMessage(data: any) {
+      console.log('Alfred message: ' + JSON.stringify(data))
+      setMessages(prev => {
+        const newMessages = [ ...prev, { id: "1", text: data.message, sender: data.role } ]
+        return newMessages
+      }) 
+    }
+
+    socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
+    socket.on('alfred_msg', onMessage);
+
+    return () => {
+      socket.off('connect', onConnect);
+      socket.off('disconnect', onDisconnect);
+      socket.off('alfred_msg', onMessage);
+    };
+  }, []);
+
   return (
     <div className="chat-container">
       <div className="chat-messages">
