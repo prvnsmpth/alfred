@@ -35,6 +35,7 @@ const router = createBrowserRouter([
 
 function App() {
   const currentPath = window.location.pathname;
+  const [callOngoing, setCallOnGoing] = React.useState(true);
   return (
     <div className="App">
       {/* <Chat /> */}
@@ -78,6 +79,7 @@ function App() {
                     <FontAwesomeIcon
                       className="sidebar__svg-icon"
                       icon={icon({ name: "phone" })}
+                      beatFade={callOngoing}
                     />
                   </span>
                   <span className="sidebar__item-text">Live Call</span>
