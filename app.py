@@ -59,7 +59,12 @@ def message_handler():
     chat_sessions[session_id].append(ai_message)
     socketio.emit('alfred_msg', {
         'session_id': session_id, 'id': message_id + 1, 'role': 'Me', 'message': ai_message.content
-    })
+    }
+
+    if CONVO_END_MARKER in ai_message.content:
+        convo_summary = ai_message.content.split(CONVO_END_MARKER)[-1]
+        print(f'Conversation ENDED. Summary: {convo_summary}')
+
     return { 'message': ai_message.content }
 
 @app.route("/api/disconnect", methods=['POST'])
