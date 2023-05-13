@@ -50,7 +50,9 @@ export const Chat: React.FC<Props> = ({ disableChat, messagesList }) => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-  const messages = messagesWithSession[currentSession] || [];
+  const messages = disableChat
+    ? messagesList
+    : messagesWithSession[currentSession] || [];
   // useLayoutEffect(() => {
   //   setTimeout(() => {
   //     if (!messagesList) setMessages(mockMessages);
@@ -99,15 +101,17 @@ export const Chat: React.FC<Props> = ({ disableChat, messagesList }) => {
       // });
     }
 
-    socket.on("connect", onConnect);
-    socket.on("disconnect", onDisconnect);
-    socket.on("alfred_msg", onMessage);
+    if (!disableChat) {
+      socket.on("connect", onConnect);
+      socket.on("disconnect", onDisconnect);
+      socket.on("alfred_msg", onMessage);
 
-    return () => {
-      socket.off("connect", onConnect);
-      socket.off("disconnect", onDisconnect);
-      socket.off("alfred_msg", onMessage);
-    };
+      return () => {
+        socket.off("connect", onConnect);
+        socket.off("disconnect", onDisconnect);
+        socket.off("alfred_msg", onMessage);
+      };
+    }
   }, []);
 
   return (
