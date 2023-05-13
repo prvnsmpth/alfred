@@ -1,11 +1,15 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { icon, solid } from "@fortawesome/fontawesome-svg-core/import.macro";
 import "./History.scss";
 import { IconName } from "@fortawesome/fontawesome-svg-core";
 import { Link } from "@nextui-org/react";
-import { faAddressBook, faCircleXmark } from "@fortawesome/free-regular-svg-icons";
+import {
+  faAddressBook,
+  faCircleXmark,
+} from "@fortawesome/free-regular-svg-icons";
 import { faPizzaSlice } from "@fortawesome/free-solid-svg-icons";
+import { Message } from "../Chat/ChatMessage";
 
 const icons = {
   "circle-xmark": faCircleXmark,
@@ -20,7 +24,31 @@ interface HistoryItem {
   duration: string;
   category: string;
   iconName: string;
+  messages?: Message[];
 }
+
+const mockMessages: Message[] = [
+  {
+    id: "1",
+    text: "Hello There",
+    sender: "Caller",
+  },
+  {
+    id: "2",
+    text: "Hi There",
+    sender: "Me",
+  },
+  {
+    id: "3",
+    text: "Hello, this is longer text Hello, this is longer text Hello, this is longer text Hello, this is longer text",
+    sender: "Caller",
+  },
+  {
+    id: "4",
+    text: "Hello, this is longer text Hello, this is longer text Hello, this is longer text Hello, this is longer text",
+    sender: "Me",
+  },
+];
 
 const mockHistoryItems: HistoryItem[] = [
   {
@@ -30,6 +58,7 @@ const mockHistoryItems: HistoryItem[] = [
     duration: "0:37:00",
     category: "Spam",
     iconName: "circle-xmark",
+    messages: mockMessages.slice(0, 2),
   },
   {
     id: "2",
@@ -38,6 +67,7 @@ const mockHistoryItems: HistoryItem[] = [
     duration: "0:7:00",
     category: "Food Delivery",
     iconName: "pizza-slice",
+    messages: mockMessages.slice(0, 3),
   },
   {
     id: "3",
@@ -46,10 +76,25 @@ const mockHistoryItems: HistoryItem[] = [
     duration: "0:10:00",
     category: "Known Contact",
     iconName: "address-book",
+    messages: mockMessages.slice(0, 4),
   },
 ];
 
 export const History = () => {
+  const [chats, setChats] = React.useState<HistoryItem[]>([]);
+  useEffect(() => {
+    async function getChats() {
+      setChats(mockHistoryItems);
+      // try {
+      //   const res = await fetch("http://localhost/api/get_chats");
+      //   const chats = await res.json();
+      //   console.log(chats);
+      // } catch (error) {
+      //   console.error(error);
+      // }
+    }
+    getChats();
+  });
   return (
     <div className="box transaction-box">
       <div className="header-container">

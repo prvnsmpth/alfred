@@ -96,8 +96,8 @@ export const Chat: React.FC<Props> = ({ disableChat, messagesList }) => {
           text,
           sender: data.role,
           type: data.type,
-          tags: data.message.tags,
-          caller: data.message.caller
+          tags: data.message?.tags,
+          caller: data.message?.caller
         },
       ];
       setMessagesWithSession(_messagesWithSession);

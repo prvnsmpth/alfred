@@ -47,9 +47,8 @@ export const ChatMessage: React.FC<Props> = ({
               <>
                 <h5>Caller:</h5>
                 {message.caller}
-                <br />
+                <br /><br />
                 <h5>Summary:</h5>
-                <br />
               </>
             ) : (
               ""
