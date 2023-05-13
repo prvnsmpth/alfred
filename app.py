@@ -4,6 +4,7 @@ import pickle
 import time
 from flask import Flask, send_from_directory, send_file, request
 from flask_socketio import SocketIO, send, emit
+from flask_cors import CORS
 
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import (
@@ -12,7 +13,7 @@ from langchain.schema import (
     SystemMessage
 )
 
-chat_openai = ChatOpenAI(model_name="gpt-3.5-turbo")
+chat_openai = ChatOpenAI(model_name="gpt-4")
 
 SYSTEM_PROMPT = '''
 You are Alfred, a personal assistant to Mr Wayne. You are handling a phone conversation for him as he is unavailable right now.
@@ -36,6 +37,7 @@ CHAT_DB = {
 }
 
 app = Flask(__name__, static_url_path='', static_folder='web/build')
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 @app.route("/")
@@ -58,7 +60,7 @@ def message_handler():
             SystemMessage(content=SYSTEM_PROMPT)
         ]
     message = request.json['message']
-    print(f'[session_id={session_id}] message = {message}')
+    print(f'[session_id={session_id}] user message = {message}')
     message_id = len(chat_sessions[session_id]) + 1
     socketio.emit('alfred_msg', {
         'session_id': session_id, 'id': message_id, 'role': 'Caller', 'message': message
@@ -75,7 +77,7 @@ def message_handler():
 
     if CONVO_END_MARKER in ai_message.content:
         final_message, convo_summary = ai_message.content.split(CONVO_END_MARKER)
-        print(f'[session_id={session_id}] Conversation ended. Summary = {convo_summary}')
+        print(f'[session_id={session_id}] Conversation ended. Summary = "{convo_summary}"')
 
         try:
             summary_data = json.loads(convo_summary.strip())
@@ -100,7 +102,7 @@ def message_handler():
         except Exception as e:
             print(f'Failed to save sessions, ignoring.', e)
         
-    print(f'[session_id={session_id}] response = {final_message}')
+    print(f'[session_id={session_id}] sending response = {final_message}')
     socketio.emit('alfred_msg', {
         'session_id': session_id, 'id': message_id + 1, 'role': 'Me', 'message': final_message
     })
@@ -133,10 +135,41 @@ def get_summary():
     else:
         return "The conversation has not ended yet.", 404
 
+def serialize_message(message):
+    if isinstance(message, HumanMessage):
+        role = 'Caller'
+    elif isinstance(message, AIMessage):
+        role = 'Me'
+    elif isinstance(message, SystemMessage):
+        role = 'System'
+    return { "role": role, "message": message.content }
+
+def deserialize_message(message):
+    role = message['role']
+    content = message['content']
+    if role == 'Caller':
+        return HumanMessage(content=content)    
+    elif role == 'Me':
+        return AIMessage(content=content)
+    elif role == 'System':
+        return SystemMessage(content=content)
+
 @app.route("/api/get_chats", methods=['GET'])
 def get_chats():
-    return CHAT_DB
+    chat_sessions = CHAT_DB['sessions']
 
+    trunc_chat_sessions = {}
+    for s_id in chat_sessions:
+        trunc_chat_sessions[s_id] = chat_sessions[s_id][1:]
+        trunc_chat_sessions[s_id] = [ 
+            serialize_message(x) for x in trunc_chat_sessions[s_id] ]
+
+    response = {
+        'sessions': trunc_chat_sessions,
+        'summaries': CHAT_DB['summaries']
+    }
+
+    return response
 
 # @socketio.on('connect')
 # def test_connect(auth):
