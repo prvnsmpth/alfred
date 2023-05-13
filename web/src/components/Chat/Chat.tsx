@@ -53,13 +53,14 @@ export const Chat: React.FC<Props> = ({ disableChat, messagesList }) => {
   const messages = disableChat
     ? messagesList
     : messagesWithSession[currentSession] || [];
-  // useLayoutEffect(() => {
-  //   setTimeout(() => {
-  //     if (!messagesList) setMessages(mockMessages);
-  //   }, 400);
-  // }, []);
+  const [containerLoaded, setContainerLoaded] = useState<boolean>(false);
+  useLayoutEffect(() => {
+    setTimeout(() => {
+      setContainerLoaded(true);
+    }, 200);
+  }, []);
   useEffect(() => {
-    scrollToBottom();
+    if (messages.length) scrollToBottom();
   }, [messages]);
 
   // useEffect(() => {
@@ -97,7 +98,7 @@ export const Chat: React.FC<Props> = ({ disableChat, messagesList }) => {
           sender: data.role,
           type: data.type,
           tags: data.message?.tags,
-          caller: data.message?.caller
+          caller: data.message?.caller,
         },
       ];
       setMessagesWithSession(_messagesWithSession);
@@ -124,7 +125,10 @@ export const Chat: React.FC<Props> = ({ disableChat, messagesList }) => {
   }, []);
 
   return (
-    <div className="chat-container">
+    <div
+      className={`chat-container ${containerLoaded ? "container-loaded" : ""}`}
+    >
+      <h3>Live Chat</h3>
       <div className="chat-messages">
         {messages.map((message: Message) => (
           <ChatMessage

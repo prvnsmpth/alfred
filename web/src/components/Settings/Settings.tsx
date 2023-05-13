@@ -5,6 +5,7 @@ import { SettingRule } from "../SettingRule/SettingRule";
 
 export const Settings = () => {
   const [settingRules, setSettingRules] = React.useState<SettingRule[]>([]);
+  const [containerLoaded, setContainerLoaded] = React.useState<boolean>(false);
   useEffect(() => {
     try {
       const settingRulesData = JSON.parse(
@@ -12,13 +13,21 @@ export const Settings = () => {
       );
       setSettingRules(settingRulesData);
     } catch (error) {}
+    setTimeout(() => {
+      setContainerLoaded(true);
+    }, 200);
   }, []);
   return (
-    <div className="settings-container">
+    <div
+      className={`settings-container ${
+        containerLoaded ? "container-loaded" : ""
+      }`}
+    >
       <br />
       <Text h3 className="settings-title">
         Settings
       </Text>
+      <br />
       <div className="settings-list">
         <Checkbox
           isRounded
@@ -40,9 +49,11 @@ export const Settings = () => {
         </Checkbox>
       </div>
       <br />
+      <br />
       <Text h3 className="settings-title">
         Rules
       </Text>
+      <br />
       <div className="settings-rules-list">
         <div>
           {settingRules.map((settingRule: SettingRule, index) => (

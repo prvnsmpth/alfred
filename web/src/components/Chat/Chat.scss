@@ -1,12 +1,20 @@
 .chat-container {
   // background-color: blue;
 //   width: 85%;
-  margin: 10px auto 0 auto;
-  padding: 40px;
+  margin: 0 auto 0 auto;
+  padding: 24px;
   background: rgba(255, 255, 255);
   border-radius: 8px;
   transition: 0.4s;
   max-width: 947px;
+  h3 {
+    text-align: left;
+  }
+  min-height: 100px;
+  transition: 0.4s;
+  &.container-loaded {
+    min-height: 160px;;
+  }
 }
 
 .chat-messages {

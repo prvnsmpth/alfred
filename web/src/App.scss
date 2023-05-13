@@ -206,6 +206,24 @@ body {
       }
   }
 
+  &__item {
+    &:nth-child(1) .is-active .sidebar__svg-icon {
+      background-color: #ff7551;
+    }
+    &:nth-child(2) .is-active .sidebar__svg-icon {
+      background-color: #32a7e2;
+    }
+    &:nth-child(3) .is-active .sidebar__svg-icon {
+      background-color: #6c5ecf;
+    }
+    &:nth-child(4) .is-active .sidebar__svg-icon {
+      background-color: #22b07d;
+    }
+    &:nth-child(5) .is-active .sidebar__svg-icon {
+      background-color: #32a7e2;
+    }
+  }
+
   &__link {
     display: flex;
     align-items: center;

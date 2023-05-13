@@ -109,11 +109,13 @@ const mockHistoryItems: HistoryItem[] = [
 
 export const History = () => {
   const [chats, setChats] = React.useState<HistoryItem[]>([]);
+  const [loaded, setLoaded] = React.useState<boolean>(false);
   useEffect(() => {
     async function getChats() {
       // setChats(mockHistoryItems);
       try {
         const res = await fetch("http://localhost/api/get_chats");
+        setLoaded(true);
         const chats = await res.json();
         const chatHistoryItems =
           convertSampleHistoryResponseToHistoryItems(chats);
@@ -127,14 +129,14 @@ export const History = () => {
     getChats();
   }, []);
   return (
-    <div className="box transaction-box">
+    <div className={`box transaction-box ${loaded ? "container-loaded" : ""}`}>
       <div className="header-container">
         <h3 className="section-header">Call History</h3>
         <div className="date-selector">
           <span>1 Jan - 1 Feb 2023</span>
         </div>
       </div>
-      <table className="transaction-history">
+      <table className={`transaction-history ${loaded ? "loaded" : ""}`}>
         <tr>
           <th>Caller</th>
           <th>Date</th>
