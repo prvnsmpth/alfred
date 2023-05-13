@@ -1,11 +1,12 @@
 from flask import Flask, send_from_directory, send_file
 from flask_socketio import SocketIO, send, emit
 
-app = Flask(__name__, static_url_path='', static_folder='web/static')
+app = Flask(__name__, static_url_path='', static_folder='web/build')
 socketio = SocketIO(app)
 
 @app.route("/")
-def index():
+@app.route("/<page>")
+def index(page=None):
     return app.send_static_file('index.html')
 
 @app.route("/hello")
