@@ -54,18 +54,33 @@ def message_handler():
     chat_sessions[session_id].append(ai_message)
     return { 'message': ai_message.content }
 
-@app.route("/api/get_summary", methods=['GET'])
-def get_summary():
-    session_id = request.args.get('session_id')
-    if session_id is None:
-        return "session_id is required", 400
+@app.route("/api/disconnect", methods=['POST'])
+def disconnect_handler():
+    if 'session_id' not in request.json:
+        return "session_id required", 400
+    session_id = request.json['session_id']
+    if session_id not in chat_sessions:
+        return f"session_id {session_id} not found", 404
+    print(f'[session_id={session_id}] Disconnected. Generating summary...')
+    summary_msg = HumanMessage(content='Generate a summary of the conversation so far.')
+    chat_sessions[session_id].append(summary_msg)
+    ai_message = chat_openai(chat_sessions[session_id])
+    chat_sessions[session_id].append(ai_message)
+    print(f'[session_id={session_id}] Summary: {ai_message.content}')
+    return 'OK', 200
 
-    last_message = chat_sessions[session_id][-1]
-    if CONVO_END_MARKER in last_message:
-        summary = last_message.split(CONVO_END_MARKER)[-1]
-        return { "summary": summary }
-    else:
-        return "The conversation has not ended yet.", 404
+# @app.route("/api/get_summary", methods=['GET'])
+# def get_summary():
+#     session_id = request.args.get('session_id')
+#     if session_id is None:
+#         return "session_id is required", 400
+#
+#     last_message = chat_sessions[session_id][-1]
+#     if CONVO_END_MARKER in last_message:
+#         summary = last_message.split(CONVO_END_MARKER)[-1]
+#         return { "summary": summary }
+#     else:
+#         return "The conversation has not ended yet.", 404
 
 @socketio.on('connect')
 def test_connect(auth):
