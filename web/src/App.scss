@@ -4,6 +4,7 @@ body {
 
 .App {
   text-align: center;
+  height: 100%;
 }
 
 .App-logo {
@@ -45,12 +46,14 @@ body {
 
 
 .outer-container {
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 16px;
   font-family: "Inter", sans-serif;
   // background: url(https://images.unsplash.com/photo-1520045892732-304bc3ac5d8e?ixlib=rb-1.2.1&ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&auto=format&fit=crop&w=1950&q=80);
+  background-image: linear-gradient(to right, #ff7300, #90de00);
   background-color: rgb(255, 255, 255);
   background-repeat: no-repeat;
   background-position: center;

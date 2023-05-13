@@ -1,17 +1,27 @@
 import React from "react";
 import "./App.scss";
 import { Chat } from "./components/Chat/Chat";
+import { History } from "./components/History/History";
 import { Chat2 } from "./components/Chat2/Chat2";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Settings } from "./components/Settings/Settings";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <div></div>,
+    element: <History />,
   },
   {
     path: "/chat",
     element: <Chat />,
+  },
+  {
+    path: "/history",
+    element: <History />,
+  },
+  {
+    path: "/settings",
+    element: <Settings />,
   },
 ]);
 
@@ -50,9 +60,12 @@ function App() {
                 </a>
               </li>
               <li className="sidebar__item">
-                <a href="/chat" className={`sidebar__link ${
+                <a
+                  href="/chat"
+                  className={`sidebar__link ${
                     currentPath === "/chat" ? "is-active" : ""
-                  }`}>
+                  }`}
+                >
                   <span className="sidebar__icon">
                     <svg
                       viewBox="0 0 24 24"
@@ -70,7 +83,12 @@ function App() {
                 </a>
               </li>
               <li className="sidebar__item">
-                <a href="" className="sidebar__link">
+                <a
+                  href="/history"
+                  className={`sidebar__link ${
+                    currentPath === "/history" ? "is-active" : ""
+                  }`}
+                >
                   <span className="sidebar__icon">
                     <svg
                       viewBox="0 0 24 24"
@@ -84,7 +102,12 @@ function App() {
                 </a>
               </li>
               <li className="sidebar__item">
-                <a href="" className="sidebar__link">
+                <a
+                  href="/settings"
+                  className={`sidebar__link ${
+                    currentPath === "/settings" ? "is-active" : ""
+                  }`}
+                >
                   <span className="sidebar__icon">
                     <svg
                       viewBox="0 0 24 24"
