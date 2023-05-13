@@ -167,6 +167,10 @@
     background: #eee;
     font-size: 12px;
     font-weight: 300;
+    transition: 0.35s;
+    &:hover {
+      background-color: #ddd;
+    }
     //     background: linear-gradient(
     //         90deg,
     //         var(--c1, #f6d365),

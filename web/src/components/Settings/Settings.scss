@@ -2,6 +2,7 @@
     background-color: white;
     height: 100%;
     border-radius: 8px;
+    position: relative;
 }
 
 .settings-title {
@@ -23,4 +24,10 @@
 
 .settings-rules-list {
     margin-left: 16px;
+}
+
+.save-button {
+    position: absolute;
+    bottom: 32px;
+    right: 32px;
 }

@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { icon } from "@fortawesome/fontawesome-svg-core/import.macro";
 import { Home } from "./components/Home/Home";
 import { ChatDetails } from "./components/ChatDetails/ChatDetails";
+import alfred from "./alfred.png";
 
 const router = createBrowserRouter([
   {
@@ -44,7 +45,10 @@ function App() {
         <div className="container">
           <div className="sidebar">
             <a href="#" className="sidebar__logo-wrapper">
-              <h1 className="sidebar__logo">S</h1>
+              <div className="alfred-logo-container">
+                <img src={alfred} />
+              </div>
+
               <h1 className="sidebar__logo-text">Alfred</h1>
             </a>
             {/* <h3 className="sidebar__title">MENU</h3> */}

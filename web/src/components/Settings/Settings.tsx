@@ -1,10 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./Settings.scss";
 import { Button, Checkbox, Text } from "@nextui-org/react";
 import { SettingRule } from "../SettingRule/SettingRule";
 
 export const Settings = () => {
   const [settingRules, setSettingRules] = React.useState<SettingRule[]>([]);
+  useEffect(() => {
+    try {
+      const settingRulesData = JSON.parse(
+        localStorage.getItem("settingRules") || "[]"
+      );
+      setSettingRules(settingRulesData);
+    } catch (error) {}
+  }, []);
   return (
     <div className="settings-container">
       <br />
@@ -37,9 +45,42 @@ export const Settings = () => {
       </Text>
       <div className="settings-rules-list">
         <div>
-          <SettingRule />
+          {settingRules.map((settingRule: SettingRule, index) => (
+            <SettingRule
+              {...settingRule}
+              onChangeAction={(e) => {
+                const newSettingRules = [...settingRules];
+                newSettingRules[index].action = e.target.value;
+                setSettingRules(newSettingRules);
+              }}
+              onChangeTopic={(e) => {
+                const newSettingRules = [...settingRules];
+                newSettingRules[index].topic = e.target.value;
+                setSettingRules(newSettingRules);
+              }}
+            />
+          ))}
+          {/* <SettingRule topic="" action="" /> */}
         </div>
-        <Button size="xs">Add +</Button>
+        <Button
+          size="xs"
+          onClick={() => {
+            setSettingRules([...settingRules, { topic: "", action: "" }]);
+          }}
+        >
+          Add +
+        </Button>
+        <Button
+          color="success"
+          className="save-button"
+          size="md"
+          onClick={() => {
+            localStorage.setItem("settingRules", JSON.stringify(settingRules));
+            // setSettingRules([...settingRules, { topic: "", action: "" }]);
+          }}
+        >
+          Save
+        </Button>
       </div>
     </div>
   );
