@@ -63,7 +63,7 @@ function convertSampleHistoryResponseToHistoryItems(chatsResponse: any) {
   const summaries: any = chatsResponse.summaries;
   for (let session in sessions) {
     const messages = sessions[session];
-    const summary = summaries[session];
+    const summary = summaries[session] || {caller: "Unknown", tags: [], summary: "NA"};
     const historyItem: HistoryItem = {
       id: session,
       caller: summary?.caller || 'Unknown',
@@ -134,7 +134,7 @@ export const History = () => {
     async function getChats() {
       // setChats(mockHistoryItems);
       try {
-        const res = await fetch("/api/get_chats");
+        const res = await fetch("http://localhost/api/get_chats");
         setLoaded(true);
         const chats = await res.json();
         const chatHistoryItems =
