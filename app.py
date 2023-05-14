@@ -48,7 +48,8 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 @app.route("/")
 @app.route("/<page>", methods=['GET'])
-def index(page=None):
+@app.route("/<page>/<id>", methods=['GET'])
+def index(page=None, id=None):
     return app.send_static_file('index.html')
 
 @app.route("/hello")
