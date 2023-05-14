@@ -32,6 +32,7 @@ interface HistoryItem {
   iconName: string;
   messages?: Message[];
   summary?: string;
+  timestamp: number;
 }
 
 const mockMessages: Message[] = [
@@ -63,11 +64,11 @@ function convertSampleHistoryResponseToHistoryItems(chatsResponse: any) {
   const summaries: any = chatsResponse.summaries;
   for (let session in sessions) {
     const messages = sessions[session];
-    const summary = summaries[session] || {caller: "Unknown", tags: [], summary: "NA"};
+    const summary = summaries[session] || {caller: "Unknown", tags: ['Unknown'], summary: "NA"};
     const historyItem: HistoryItem = {
       id: session,
       caller: summary?.caller || 'Unknown',
-      date: "May 14,2023",
+      date: `${new Date(summary.ts * 1000).toLocaleDateString()}}`,
       duration: `0:${Math.floor(Math.random() * 60)}:00`,
       category: summary.tags[0],
       iconName: "circle-xmark",
@@ -81,6 +82,7 @@ function convertSampleHistoryResponseToHistoryItems(chatsResponse: any) {
         };
       }),
       summary: summary?.summary || "",
+      timestamp: summary?.ts || 0,
     };
     if (historyItem.messages) {
       historyItem.messages.push({
@@ -94,6 +96,9 @@ function convertSampleHistoryResponseToHistoryItems(chatsResponse: any) {
     }
     historyItems.push(historyItem);
   }
+  historyItems.sort((a, b) => {
+    return (b.timestamp || 0) - (a.timestamp || 0);
+  })
   return historyItems;
 }
 
@@ -106,6 +111,7 @@ const mockHistoryItems: HistoryItem[] = [
     category: "Spam",
     iconName: "circle-xmark",
     messages: mockMessages.slice(0, 2),
+    timestamp: 0,
   },
   {
     id: "2",
@@ -115,6 +121,7 @@ const mockHistoryItems: HistoryItem[] = [
     category: "Food Delivery",
     iconName: "pizza-slice",
     messages: mockMessages.slice(0, 3),
+    timestamp: 0,
   },
   {
     id: "3",
@@ -124,6 +131,7 @@ const mockHistoryItems: HistoryItem[] = [
     category: "Known Contact",
     iconName: "address-book",
     messages: mockMessages.slice(0, 4),
+    timestamp: 0,
   },
 ];
 
