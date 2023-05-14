@@ -592,3 +592,10 @@ tr > td:first-child {
     font-size: 15px;
   }
 }
+
+.summary-column {
+    max-width: 200px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}

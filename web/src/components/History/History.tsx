@@ -25,6 +25,7 @@ interface HistoryItem {
   category: string;
   iconName: string;
   messages?: Message[];
+  summary?: string;
 }
 
 const mockMessages: Message[] = [
@@ -67,11 +68,24 @@ function convertSampleHistoryResponseToHistoryItems(chatsResponse: any) {
       messages: messages.map((message: any) => {
         return {
           id: String(+new Date()),
-          text: message.message,
+          text: message.message.includes("CONVO_END")
+            ? message.message.split("CONVO_END")[0]
+            : message.message,
           sender: message.role,
         };
       }),
+      summary: summary?.summary || '',
     };
+    if (historyItem.messages) {
+      historyItem.messages.push({
+        id: String(+new Date()),
+        text: summary?.summary,
+        sender: "Me",
+        type: "summary",
+        tags: summary?.tags,
+        caller: summary?.caller
+      });
+    }
     historyItems.push(historyItem);
   }
   return historyItems;
@@ -142,6 +156,7 @@ export const History = () => {
           <th>Date</th>
           <th>Call Duration</th>
           <th>Category</th>
+          <th>Summary</th>
         </tr>
         {chats.map((historyItem: HistoryItem) => {
           return (
@@ -166,6 +181,9 @@ export const History = () => {
                 />
                 &nbsp;&nbsp;  */}
                 {historyItem.category}
+              </td>
+              <td className="summary-column" title={historyItem.summary}>
+                {historyItem.summary}
               </td>
             </tr>
           );
