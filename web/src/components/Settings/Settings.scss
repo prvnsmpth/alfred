@@ -16,6 +16,8 @@
 }
 
 .settings-title {
+  display: flex;
+  justify-content: space-between;
   text-align: left;
   // padding-left: 16px;
 }
@@ -37,7 +39,7 @@
 }
 
 .save-button {
-  position: absolute;
-  bottom: 32px;
-  right: 32px;
+//   position: absolute;
+//   bottom: 32px;
+//   right: 32px;
 }

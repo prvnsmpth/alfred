@@ -51,7 +51,18 @@ export const Settings = () => {
       <br />
       <br />
       <Text h3 className="settings-title">
-        Rules
+        <span>Rules</span>
+        <Button
+          color="success"
+          className="save-button"
+          size="xs"
+          onClick={() => {
+            localStorage.setItem("settingRules", JSON.stringify(settingRules));
+            // setSettingRules([...settingRules, { topic: "", action: "" }]);
+          }}
+        >
+          Save
+        </Button>
       </Text>
       <br />
       <div className="settings-rules-list">
@@ -80,17 +91,6 @@ export const Settings = () => {
           }}
         >
           Add +
-        </Button>
-        <Button
-          color="success"
-          className="save-button"
-          size="md"
-          onClick={() => {
-            localStorage.setItem("settingRules", JSON.stringify(settingRules));
-            // setSettingRules([...settingRules, { topic: "", action: "" }]);
-          }}
-        >
-          Save
         </Button>
       </div>
     </div>
