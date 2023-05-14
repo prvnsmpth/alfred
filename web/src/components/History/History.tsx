@@ -66,7 +66,7 @@ function convertSampleHistoryResponseToHistoryItems(chatsResponse: any) {
     const summary = summaries[session];
     const historyItem: HistoryItem = {
       id: session,
-      caller: summary.caller,
+      caller: summary?.caller,
       date: "May 14,2023",
       duration: `0:${Math.floor(Math.random() * 60)}:00`,
       category: summary.tags[0],
@@ -134,7 +134,7 @@ export const History = () => {
     async function getChats() {
       // setChats(mockHistoryItems);
       try {
-        const res = await fetch("/api/get_chats");
+        const res = await fetch("http://localhost/api/get_chats");
         setLoaded(true);
         const chats = await res.json();
         const chatHistoryItems =
