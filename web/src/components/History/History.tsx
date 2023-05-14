@@ -74,7 +74,7 @@ function convertSampleHistoryResponseToHistoryItems(chatsResponse: any) {
           sender: message.role,
         };
       }),
-      summary: summary?.summary || '',
+      summary: summary?.summary || "",
     };
     if (historyItem.messages) {
       historyItem.messages.push({
@@ -83,7 +83,7 @@ function convertSampleHistoryResponseToHistoryItems(chatsResponse: any) {
         sender: "Me",
         type: "summary",
         tags: summary?.tags,
-        caller: summary?.caller
+        caller: summary?.caller,
       });
     }
     historyItems.push(historyItem);
@@ -163,7 +163,9 @@ export const History = () => {
             <tr key={historyItem.id}>
               <td>
                 <Link href={`/history/${historyItem.id}`}>
-                  {historyItem.caller}
+                  <span className="caller-column" title={historyItem.caller}>
+                    {historyItem.caller}
+                  </span>
                 </Link>
               </td>
               <td>{historyItem.date}</td>

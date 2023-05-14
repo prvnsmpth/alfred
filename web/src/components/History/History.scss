@@ -599,3 +599,10 @@ tr > td:first-child {
     text-overflow: ellipsis;
     overflow: hidden;
 }
+
+.caller-column {
+    max-width: 200px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
