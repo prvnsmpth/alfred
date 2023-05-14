@@ -66,7 +66,7 @@ function convertSampleHistoryResponseToHistoryItems(chatsResponse: any) {
     const summary = summaries[session];
     const historyItem: HistoryItem = {
       id: session,
-      caller: messages[0].role === "Caller" ? messages[0].message : "Unknown",
+      caller: summary.caller,
       date: "May 14,2023",
       duration: `0:${Math.floor(Math.random() * 60)}:00`,
       category: summary.tags[0],
