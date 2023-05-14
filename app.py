@@ -73,6 +73,7 @@ def generate_summary(session_id):
     except Exception as e:
         print(f'[session_id={session_id}] Got malformed summary JSON', e)
         summary = { "caller": "Unknown", "summary": ai_message.content, "tags": [] }
+        CHAT_DB['summaries'][session_id] = summary
     
     # Send summary to client UI
     print(f'[session_id={session_id}] Sending websocket message to client.')
