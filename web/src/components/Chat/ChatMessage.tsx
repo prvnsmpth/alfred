@@ -58,8 +58,9 @@ export const ChatMessage: React.FC<Props> = ({
               <>
                 <br /><br />
                 <h5>Tags:{" "}</h5>
+                <br />
                 {message.tags?.map((tag) => (
-                  <Badge color="primary">{tag}</Badge>
+                  <Badge color="primary" disableOutline className="message-tag">{tag}</Badge>
                 ))}
                 <br /><br />
               </>

@@ -45,6 +45,7 @@ export const Chat: React.FC<Props> = ({ disableChat, messagesList }) => {
   messagesWithSessionRef.current = messagesWithSession;
   const [newMessage, setNewMessage] = React.useState<string>("");
   const [loading, setLoading] = React.useState<"left" | "right" | null>(null);
+  const [hideLoading, setHideLoading] = React.useState<boolean>(false);
   const [isConnected, setIsConnected] = useState(socket.connected);
   const messagesEndRef = useRef<any>(null);
   const scrollToBottom = () => {
@@ -61,6 +62,9 @@ export const Chat: React.FC<Props> = ({ disableChat, messagesList }) => {
   }, []);
   useEffect(() => {
     if (messages.length) scrollToBottom();
+    if (messages.find((m: any) => m.type === "summary")) {
+      setHideLoading(true);
+    }
   }, [messages]);
 
   // useEffect(() => {
@@ -70,6 +74,12 @@ export const Chat: React.FC<Props> = ({ disableChat, messagesList }) => {
   // }, [currentSession]);
 
   console.log("messagesWithSession", messagesWithSession);
+
+  // useEffect(() => {
+  //   if (!hideLoading) {
+  //     setLoading(null);
+  //   }
+  // }, [hideLoading]);
 
   useEffect(() => {
     function onConnect() {
@@ -101,6 +111,18 @@ export const Chat: React.FC<Props> = ({ disableChat, messagesList }) => {
           caller: data.message?.caller,
         },
       ];
+
+      if (data.type === "summary") {
+        setLoading(null);
+        setHideLoading(true);
+      } else {
+        if (!hideLoading) {
+          setLoading(data.role === "Me" ? "left" : "right");
+        } else {
+          setLoading(null);
+        }
+      }
+
       setMessagesWithSession(_messagesWithSession);
       // setMessages((prev) => {
       //   const newMessages = [
@@ -137,11 +159,13 @@ export const Chat: React.FC<Props> = ({ disableChat, messagesList }) => {
             message={message}
           />
         ))}
-        {loading ? (
+        {loading && !hideLoading ? (
           <Loading
             type="points"
             color="warning"
-            className={`loader ${loading === "right" ? "loader-right" : ""}`}
+            className={`loader ${
+              loading === "right" ? "loader-right" : "loader-left"
+            }`}
           />
         ) : (
           ""
