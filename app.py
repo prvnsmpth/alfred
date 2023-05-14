@@ -2,9 +2,11 @@ import os
 import json
 import pickle
 import time
+
 from flask import Flask, send_from_directory, send_file, request
 from flask_socketio import SocketIO, send, emit
 from flask_cors import CORS
+from concurrent.futures import ThreadPoolExecutor
 
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import (
@@ -23,11 +25,14 @@ My interests are: Home loan
 For topics other than my interests, be very rude and sassy.
 Once you've collected enough information, tell them that you'll pass on this information to Mr Wayne and he'll call them back.
 Output this string: "CONVO_END".
+'''
 
-Finally generate a summary of the call for Mr Wayne to review in JSON format. Should have the following and only the following fields:
-"caller", "summary", "tags".
+SUMMARY_PROMPT = '''
+Generate a summary of this call for Mr Wayne to review in JSON format. 
+Should have the following and only the following fields: "caller", "summary", "tags".
 "tags" field is an array and can have the following values: "important", "scam", "spam", "sales".
 '''
+
 CONVO_END_MARKER = 'CONVO_END'
 CHATS_FILE = 'chats.pickle'
 
@@ -37,6 +42,7 @@ CHAT_DB = {
 }
 
 app = Flask(__name__, static_url_path='', static_folder='web/build')
+executor = ThreadPoolExecutor(max_workers=5)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 socketio = SocketIO(app, cors_allowed_origins="*")
 
@@ -48,6 +54,41 @@ def index(page=None):
 @app.route("/hello")
 def hello_world():
     return "<p>Hello, World!</p>"
+
+def generate_summary(session_id):
+    chat_session = CHAT_DB['sessions'][session_id]
+    summary_chat_session = chat_session.copy()
+    summary_chat_session.append(
+        HumanMessage(content=SUMMARY_PROMPT))
+    ai_message = chat_openai(summary_chat_session)
+
+    try:
+        print(f'[session_id={session_id}] Summary = {ai_message.content}')
+        summary = json.loads(ai_message.content)
+        print(f'[session_id={session_id}] Loaded summary JSON')
+        summary['ts'] = time.time()
+        CHAT_DB['summaries'][session_id] = summary
+        print(f'[session_id={session_id}] Save summary JSON to map')
+    except Exception as e:
+        print(f'[session_id={session_id}] Got malformed summary JSON', e)
+        summary = { "caller": "Unknown", "summary": ai_message.content, "tags": [] }
+    
+    # Send summary to client UI
+    print(f'[session_id={session_id}] Sending websocket message to client.')
+    socketio.emit('alfred_msg', {
+        'type': 'summary',
+        'session_id': session_id, 
+        'id': 1024, 
+        'role': 'Me', 
+        'message': summary
+    })
+
+    print(f'[session_id={session_id}] Persisting sessions to disk...')
+    try:
+        save_sessions()
+    except Exception as e:
+        print(f'[session_id={session_id}] Failed to save sessions, ignoring.', e)
+
 
 @app.route("/api/message", methods=['POST'])
 def message_handler():
@@ -76,31 +117,11 @@ def message_handler():
     final_message = ai_message.content
 
     if CONVO_END_MARKER in ai_message.content:
-        final_message, convo_summary = ai_message.content.split(CONVO_END_MARKER)
-        print(f'[session_id={session_id}] Conversation ended. Summary = "{convo_summary}"')
-
-        try:
-            summary_data = json.loads(convo_summary.strip())
-            summary_data['ts'] = time.time()
-            CHAT_DB['summaries'][session_id] = summary_data
-        except Exception as e:
-            print(f'Got malformed JSON', e)
-            summary_data = { "caller": "Unknown", "summary": convo_summary, "tags": [] }
-
-        # Send the summary to the UI for displaying
-        socketio.emit('alfred_msg', {
-            'type': 'summary',
-            'session_id': session_id, 
-            'id': message_id + 1, 
-            'role': 'Me', 
-            'message': summary_data
-        })
-
-        print(f'[session_id={session_id}] Persisting sessions to disk...')
-        try:
-            save_sessions()
-        except Exception as e:
-            print(f'Failed to save sessions, ignoring.', e)
+        # Trigger async task to generate summary
+        print(f'[session_id={session_id}] Conversation ended.')
+        # asyncio.create_task(generate_summary(session_id))
+        executor.submit(generate_summary, session_id)
+        final_message = ai_message.content.split(CONVO_END_MARKER)[0]
         
     print(f'[session_id={session_id}] sending response = {final_message}')
     socketio.emit('alfred_msg', {
