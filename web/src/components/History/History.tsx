@@ -128,7 +128,7 @@ export const History = () => {
     async function getChats() {
       // setChats(mockHistoryItems);
       try {
-        const response = await fetch("/api/get_chats");
+        const res = await fetch("/api/get_chats");
         setLoaded(true);
         const chats = await res.json();
         const chatHistoryItems =
