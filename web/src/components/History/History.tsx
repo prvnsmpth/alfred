@@ -63,7 +63,7 @@ function convertSampleHistoryResponseToHistoryItems(chatsResponse: any) {
   const summaries: any = chatsResponse.summaries;
   for (let session in sessions) {
     const messages = sessions[session];
-    const summary = summaries[session] || {caller: "Unknown", tags: [], summary: "NA"};
+    const summary = summaries[session] || {caller: "Unknown", tags: ["unknown"], summary: "NA"};
     const historyItem: HistoryItem = {
       id: session,
       caller: summary?.caller || 'Unknown',
