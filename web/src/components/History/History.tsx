@@ -154,7 +154,7 @@ export const History = () => {
         <tr>
           <th>Caller</th>
           <th>Date</th>
-          <th>Call Duration</th>
+          {/* <th>Call Duration</th> */}
           <th>Category</th>
           <th>Summary</th>
         </tr>
@@ -169,7 +169,7 @@ export const History = () => {
                 </Link>
               </td>
               <td>{historyItem.date}</td>
-              <td>{historyItem.duration}</td>
+              {/* <td>{historyItem.duration}</td> */}
               <td>
                 {/* <FontAwesomeIcon
                   icon={solid("circle-xmark")}
