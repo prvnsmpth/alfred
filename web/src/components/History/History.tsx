@@ -17,6 +17,12 @@ const icons = {
   "address-book": faAddressBook,
 };
 
+const categoryToColorMap: Record<string, string> = {
+  spam: "error",
+  scam: "error",
+  important: "success",
+};
+
 interface HistoryItem {
   id: string;
   caller: string;
@@ -182,7 +188,11 @@ export const History = () => {
                   }
                 />
                 &nbsp;&nbsp;  */}
-                <Badge color="primary">{historyItem.category}</Badge>
+                <Badge
+                  color={categoryToColorMap[historyItem.category] as any || "primary"}
+                >
+                  {historyItem.category}
+                </Badge>
               </td>
               <td className="summary-column" title={historyItem.summary}>
                 {historyItem.summary}
