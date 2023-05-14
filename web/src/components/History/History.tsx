@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { icon, solid } from "@fortawesome/fontawesome-svg-core/import.macro";
 import "./History.scss";
 import { IconName } from "@fortawesome/fontawesome-svg-core";
-import { Link } from "@nextui-org/react";
+import { Badge, Link } from "@nextui-org/react";
 import {
   faAddressBook,
   faCircleXmark,
@@ -182,7 +182,7 @@ export const History = () => {
                   }
                 />
                 &nbsp;&nbsp;  */}
-                {historyItem.category}
+                <Badge color="primary">{historyItem.category}</Badge>
               </td>
               <td className="summary-column" title={historyItem.summary}>
                 {historyItem.summary}
