@@ -62,13 +62,13 @@ function convertSampleHistoryResponseToHistoryItems(chatsResponse: any) {
   const historyItems: HistoryItem[] = [];
   const sessions: any = chatsResponse.sessions;
   const summaries: any = chatsResponse.summaries;
-  for (let session in sessions) {
+  for (let session in summaries) {
     const messages = sessions[session];
     const summary = summaries[session] || {caller: "Unknown", tags: ["unknown"], summary: "NA"};
     const historyItem: HistoryItem = {
       id: session,
       caller: summary?.caller || 'Unknown',
-      date: `${new Date(summary.ts * 1000).toLocaleDateString()}}`,
+      date: `${new Date(summary.ts * 1000).toLocaleDateString()} ${new Date(summary.ts * 1000).toLocaleTimeString()}`,
       duration: `0:${Math.floor(Math.random() * 60)}:00`,
       category: summary.tags[0],
       iconName: "circle-xmark",
