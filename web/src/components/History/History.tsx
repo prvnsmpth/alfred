@@ -152,9 +152,9 @@ export const History = () => {
     <div className={`box transaction-box ${loaded ? "container-loaded" : ""}`}>
       <div className="header-container">
         <h3 className="section-header">Call History</h3>
-        <div className="date-selector">
-          <span>1 Jan - 1 Feb 2023</span>
-        </div>
+        {/* <div className="date-selector">
+          <span>May 2023</span>
+        </div> */}
       </div>
       <table className={`transaction-history ${loaded ? "loaded" : ""}`}>
         <tr>
